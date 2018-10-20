@@ -422,6 +422,8 @@ namespace scatterer
 			//m_oceanMaterial.renderQueue=Core.Instance.oceanRenderQueue;
 			//m_oceanMaterial.renderQueue=2050;
 
+			m_oceanMaterial.renderQueue=Core.Instance.oceanRenderQueue;
+
 			//underwaterMeshrenderer.enabled = (h < 0);
 			isUnderwater = h < 0;
 

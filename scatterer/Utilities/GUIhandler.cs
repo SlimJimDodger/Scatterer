@@ -566,7 +566,7 @@ namespace scatterer
 							GUILayout.Label ("current fourierGridSize: "+Core.Instance.m_fourierGridSize.ToString());
 							GUILayout.EndHorizontal ();
 							
-							//GUIint("Ocean renderqueue", ref oceanRenderQueue, ref oceanRenderQueue,1);
+							GUIint("Ocean renderqueue", ref Core.Instance.oceanRenderQueue, ref Core.Instance.oceanRenderQueue,1);
 						}	
 						GUILayout.EndScrollView ();
 						

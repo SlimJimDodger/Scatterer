@@ -9,6 +9,7 @@ using System.Runtime;
 using KSP;
 using KSP.IO;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace scatterer
 {
@@ -120,6 +121,8 @@ namespace scatterer
 		[Persistent]
 		public bool
 			oceanRefraction = true;
+
+		public int oceanRenderQueue = 2500;
 
 		[Persistent]
 		public bool
@@ -253,7 +256,10 @@ namespace scatterer
 		public bool isActive = false;
 		public bool mainMenu=false;
 		string versionNumber = "0.0334dev";
-		
+
+		CommandBuffer heatRefractionCommandBuffer;
+		Material heatRefractionmaterial;
+
 		//Material originalMaterial;
 		
 		public Transform GetScaledTransform (string body)
@@ -490,7 +496,121 @@ namespace scatterer
 					{
 						mapEVEClouds();
 					}
+
+
+
+//					//add and test cone
+//					if (FlightGlobals.ActiveVessel)
+//					{
+//						GameObject aConeGO = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+//						GameObject.Destroy (aConeGO.GetComponent<Collider> ());
+//					
+//						aConeGO.transform.localScale = Vector3.one;
+//					
+//						MeshFilter mf = aConeGO.GetComponent<MeshFilter>();
+//						mf.mesh = MeshFactory.MakeCone(0.5f,3f,10f,16);
+//
+//						mf.mesh.RecalculateBounds();
+//						mf.mesh.RecalculateNormals();
+//					
+//						var mr = aConeGO.GetComponent<MeshRenderer>();
+//						//mr.material = material;
+//					
+//						//			mr.castShadows = false;
+//						mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+//						mr.receiveShadows = true;
+//						mr.enabled = true;
+//
+//						//aConeGO.transform.Rotate(new Vector3(90f,0f,0f));
+//						aConeGO.transform.localPosition= new Vector3(0f, 0f, 0f);
+//						aConeGO.transform.up = FlightGlobals.ActiveVessel.transform.forward;
+//						aConeGO.transform.parent = FlightGlobals.ActiveVessel.transform;
+//					}
+
+
+					//add heat refraction copier
+
+
+					//refraction command buffer
+					heatRefractionCommandBuffer = new CommandBuffer();
+					heatRefractionCommandBuffer.name = "ScattererHeatGrabScreen";
 					
+					// copy screen
+					heatRefractionCommandBuffer.Blit (BuiltinRenderTextureType.CurrentActive, Core.Instance.bufferRenderingManager.refractionTexture);
+					heatRefractionCommandBuffer.SetGlobalTexture("_refractionTexture", Core.Instance.bufferRenderingManager.refractionTexture);
+					
+//					farCamera.AddCommandBuffer  (CameraEvent.AfterForwardAlpha, heatRefractionCommandBuffer);  //this shit is messed up, everything is transparent or fucked
+//					nearCamera.AddCommandBuffer (CameraEvent.AfterForwardAlpha, heatRefractionCommandBuffer);  //found this to be after 2500 and before 2501
+
+//					farCamera.AddCommandBuffer  (CameraEvent.AfterForwardOpaque, heatRefractionCommandBuffer); //this works for pretty much everything except my ocean
+//					nearCamera.AddCommandBuffer (CameraEvent.AfterForwardOpaque, heatRefractionCommandBuffer); //same, found this to be after 2500 and before 2501, wtf?
+
+					//farCamera.AddCommandBuffer  (CameraEvent.AfterEverything, heatRefractionCommandBuffer); //
+					//nearCamera.AddCommandBuffer (CameraEvent.AfterEverything, heatRefractionCommandBuffer); //still working after 2500 and before 2501
+
+					//nearCamera.AddCommandBuffer (CameraEvent.AfterHaloAndLensFlares , heatRefractionCommandBuffer); //still working after 2500 and before 2501
+
+					//nearCamera.AddCommandBuffer (CameraEvent.AfterImageEffectsOpaque , heatRefractionCommandBuffer); //still working after 2500 and before 2501
+					farCamera.AddCommandBuffer (CameraEvent.AfterForwardOpaque , heatRefractionCommandBuffer); //still working after 2500 and before 2501
+					nearCamera.AddCommandBuffer (CameraEvent.AfterForwardOpaque , heatRefractionCommandBuffer); //still working after 2500 and before 2501
+
+					//load texture and create material					
+					Texture2D heatTexture=new Texture2D(1,1);
+					heatTexture.LoadImage(System.IO.File.ReadAllBytes (String.Format ("{0}/{1}", path+"/heatRefraction", "heat.png")));
+
+					heatRefractionmaterial = new Material (ShaderReplacer.Instance.LoadedShaders[ ("Scatterer/ParticleRefraction")]);
+
+					heatRefractionmaterial.SetTexture("_heatTexture", heatTexture);
+					heatRefractionmaterial.renderQueue = 3099;
+
+
+					//TODO find particle emitter and replace material first and later add own particle emitter
+					if (FlightGlobals.ActiveVessel)
+					{
+//						List<Part> parts = FlightGlobals.ActiveVessel.parts ;
+//						Debug.Log("parts "+parts.Count().ToString());
+//						foreach (Part _part in parts)
+//						{
+//							if (_part.name == "turboJet")
+//							{
+//								Debug.Log("_part.gameObject.name "+_part.gameObject.name);
+//								Component[] comps = _part.gameObject.GetComponentsInChildren(typeof(ModuleEnginesFX)) ;
+//								if (comps.Count() == 0)
+//								{
+//									comps = _part.gameObject.GetComponentsInChildren(typeof(ModuleEngines));
+//								}
+//								foreach (Component _comp in comps)
+//								{
+//									Debug.Log("_comp.name "+_comp.name);
+//									Debug.Log("_comp.type "+_comp.GetType().ToString());
+//
+//									Component[] comps2 = _comp.gameObject.GetComponents(typeof(ParticleSystem));
+//									if (comps2.Count() == 0)
+//									{
+//										Debug.Log("0 comps");
+//										comps2 = _comp.gameObject.GetComponentsInChildren(typeof(ParticleSystem));
+//									}
+//									foreach (Component _comp2 in comps2)
+//									{
+//										Debug.Log("_comp2.name "+_comp2.name);
+//										Debug.Log("_comp2.type "+_comp2.GetType().ToString());
+//									}
+//								}
+//
+//							}
+//						}
+
+//						ParticleSystem[] particleSystems = (ParticleSystem[]) ParticleSystem.FindObjectsOfType(typeof( ParticleSystem));
+//						Debug.Log("particleSystems "+particleSystems.Count().ToString());
+//						foreach (ParticleSystem _ps in particleSystems)
+//						{
+//							Debug.Log("name "+_ps.name);
+//							Debug.Log("GO name "+_ps.gameObject.name);
+//							Debug.Log("parent GO name "+_ps.gameObject.transform.parent.gameObject.name);
+//						}
+					}
+
+
 					found = true;
 				}			
 
@@ -727,6 +847,134 @@ namespace scatterer
 
 						}
 					}
+
+
+					ParticleSystem[] particleEmitters = (ParticleSystem[]) ParticleSystem.FindObjectsOfType(typeof(ParticleSystem));
+					Debug.Log("particleEmitters.Count() " + particleEmitters.Count().ToString());
+					foreach (ParticleSystem _pEM in particleEmitters)
+					{
+						if (_pEM.gameObject)
+						{
+							Debug.Log("_pEM.gameObject.name "+_pEM.gameObject.name);
+						}
+						if (_pEM.transform)
+						{
+							Debug.Log("_pEM.transform.name "+_pEM.transform.name);
+						}
+						if (_pEM.transform.parent)
+						{
+							Debug.Log("_pEM.transform.parent.name "+_pEM.transform.parent.name);
+
+							if (_pEM.transform.parent.parent)
+							{
+								Debug.Log("_pEM.transform.parent.parent.name "+_pEM.transform.parent.parent.name);
+
+								if (_pEM.transform.parent.name.Contains("afterburner"))
+								{
+									ParticleSystemRenderer _pr =  _pEM.GetComponent<ParticleSystemRenderer>();
+									if (_pr)
+									{
+										Debug.Log("_pr");
+										_pr.material = heatRefractionmaterial;
+										_pr.sortMode = ParticleSystemSortMode.OldestInFront;
+
+										var sz = _pEM.sizeOverLifetime;
+										if (!ReferenceEquals(sz,null))
+										{
+											//sz.enabled = false;
+											//sz.
+											Debug.Log("sz.size "+sz.size.ToString());
+											Debug.Log("sz.sizeMultiplier "+sz.sizeMultiplier.ToString());
+
+											Debug.Log("sz.xMultiplier "+sz.xMultiplier.ToString());
+											//Debug.Log("sz.x.curve "+sz.x.curve.ToString());
+//											foreach (Keyframe _keyf in sz.x.curve.keys)
+//											{
+//												Debug.Log("t: "+_keyf.time.ToString()+ ". x: "+_keyf.value.ToString());
+////												if (_keyf.time == 1f)
+////												{
+////													_keyf.value = 3f;
+////												}
+//											}
+
+											if (!ReferenceEquals(sz.x.curveMax,null))
+												Debug.Log("sz.x.curveMax "+sz.x.curveMax.ToString());
+
+											if (!ReferenceEquals(sz.x.curveMin,null))
+												Debug.Log("sz.x.curveMin "+sz.x.curveMin.ToString());
+
+											for (int i=0;i<sz.x.curve.keys.Length;i++)
+											{
+												Debug.Log("i: "+i.ToString());
+												Debug.Log("t: "+sz.x.curve.keys[i].time.ToString()+ ". x: "+sz.x.curve.keys[i].value.ToString());
+												if (sz.x.curve.keys[i].time == 1f)
+												{
+													sz.x.curve.keys[i].value = 3f;
+												}
+											}
+
+											Debug.Log("sz.yMultiplier "+sz.yMultiplier.ToString());
+											//Debug.Log("sz.y.curve "+sz.y.curve.ToString());
+											foreach (Keyframe _keyf in sz.y.curve.keys)
+											{
+												Debug.Log("t: "+_keyf.time.ToString()+ ". y: "+_keyf.value.ToString());
+											}
+
+											Debug.Log("sz.zMultiplier "+sz.zMultiplier.ToString());
+											//Debug.Log("sz.z.curve "+sz.z.curve.ToString());
+											foreach (Keyframe _keyf in sz.z.curve.keys)
+											{
+												Debug.Log("t: "+_keyf.time.ToString()+ ". z: "+_keyf.value.ToString());
+											}
+										}
+
+
+										//_pr.alignment = ParticleSystemRenderSpace.View;
+										//_pr.alignment = ParticleSystemRenderSpace.Facing;
+										//_pEM.inheritVelocity.mode  = ParticleSystemInheritVelocityMode.Current;
+//										Debug.Log("_pEM.main.startSize "+_pEM.main.startSize.ToString());
+//										Debug.Log("_pEM.main.startLifetime "+_pEM.main.startLifetime.ToString());
+//										Debug.Log("_pEM.main.startSpeed "+_pEM.main.startSpeed.ToString());
+//										Debug.Log("_pEM.main.duration "+_pEM.main.duration.ToString());
+//										Debug.Log("_pEM.main.maxParticles "+_pEM.main.maxParticles.ToString());
+//
+//										Debug.Log("_pEM.emission.burstCount "+_pEM.emission.burstCount.ToString());
+//										Debug.Log("_pEM.emission.rateOverTime "+_pEM.emission.rateOverTime.ToString());
+
+
+
+										//_pEM.shape.alignToDirection = false;
+
+									}
+								}
+								else
+								{
+									_pEM.gameObject.SetActive(false);
+								}
+
+//								if (_pEM.transform.parent.parent.parent)
+//								{
+//									Debug.Log("_pEM.transform.parent.parent.parent.name "+_pEM.transform.parent.parent.parent.name);
+//
+//									if (_pEM.transform.parent.parent.parent.parent)
+//									{
+//										Debug.Log("_pEM.transform.parent.parent.parent.parent.name "+_pEM.transform.parent.parent.parent.parent.name);
+//									}
+//								}
+							}
+
+						}
+					}
+
+//					ParticleSystem[] particleSystems = (ParticleSystem[]) ParticleSystem.FindObjectsOfType(typeof( ParticleSystem));
+//					Debug.Log("particleSystems "+particleSystems.Count().ToString());
+//					foreach (ParticleSystem _ps in particleSystems)
+//					{
+//						Debug.Log("name "+_ps.name);
+//						Debug.Log("GO name "+_ps.gameObject.name);
+//						Debug.Log("parent GO name "+_ps.gameObject.transform.parent.gameObject.name);
+//					}
+
 				}
 			} 
 		}

@@ -180,7 +180,7 @@ namespace scatterer
 					godrayDepthTexture.Create ();
 				}
 
-				if (Core.Instance.useOceanShaders && Core.Instance.oceanRefraction)
+				//if (Core.Instance.useOceanShaders && Core.Instance.oceanRefraction)
 				{
 					refractionTexture = new RenderTexture ( Screen.width,Screen.height,16, RenderTextureFormat.ARGB32);
 					refractionTexture.name = "scattererRefractionTexture";

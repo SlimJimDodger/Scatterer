@@ -103,6 +103,8 @@
      <None Include="Assets\shaders\OceanWhiteCapsModProj3.shader" />
      <None Include="Assets\shaders\OldOrUnused\AccumulateExposure.shader" />
      <None Include="Assets\shaders\GrassBak.shader" />
+     <None Include="Assets\shaders\ParticleRefraction.shader" />
+     <None Include="Assets\shaders\CloudVolumeParticleBAKKK.shader" />
      <None Include="Assets\shaders\SphereCloud.shader" />
      <None Include="Assets\shaders\InitJacobians.shader" />
      <None Include="Assets\shaders\CloudVolumeParticle.shader" />
