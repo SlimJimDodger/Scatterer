@@ -24,7 +24,7 @@ namespace scatterer
 		private SunlightModulator()
 		{
 			sunLight = Core.Instance.sunLight.GetComponent < Light > ();
-			preRenderHook = (SunlightModulatorPreRenderHook) Core.Instance.farCamera.gameObject.AddComponent(typeof(SunlightModulatorPreRenderHook));
+			preRenderHook = (SunlightModulatorPreRenderHook) Core.Instance.nearCamera.gameObject.AddComponent(typeof(SunlightModulatorPreRenderHook));
 			postRenderHook = (SunlightModulatorPostRenderHook) Core.Instance.nearCamera.gameObject.AddComponent(typeof(SunlightModulatorPostRenderHook)); //less than optimal, doesn't affect internalCamera
 																																						  //but also the issue is that internalCamera
 		}

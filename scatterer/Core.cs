@@ -267,11 +267,12 @@ namespace scatterer
 
 			scaledSpaceCamera = Camera.allCameras.FirstOrDefault(_cam  => _cam.name == "Camera ScaledSpace");
 			farCamera = Camera.allCameras.FirstOrDefault(_cam  => _cam.name == "Camera 01");
+			//farCamera.farClipPlane = 1400000f;
 			nearCamera = Camera.allCameras.FirstOrDefault(_cam  => _cam.name == "Camera 00");
 
 			if (scaledSpaceCamera && farCamera && nearCamera)
 			{
-				farCameraShadowCascadeTweaker = (TweakFarCameraShadowCascades) farCamera.gameObject.AddComponent(typeof(TweakFarCameraShadowCascades));
+				farCameraShadowCascadeTweaker = (TweakFarCameraShadowCascades) nearCamera.gameObject.AddComponent(typeof(TweakFarCameraShadowCascades));
 
 				if (overrideNearClipPlane)
 				{
@@ -309,6 +310,8 @@ namespace scatterer
 				if (_light.gameObject.name == "SunLight")
 				{
 					sunLight=_light.gameObject;
+					Debug.Log("ghassen custom shadow resolution "+_light.shadowCustomResolution.ToString());
+					_light.shadowCustomResolution=8192;
 				}	
 
 				
@@ -416,13 +419,13 @@ namespace scatterer
 			//create buffer manager
 			if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
 			{
-				bufferRenderingManager = (BufferRenderingManager)farCamera.gameObject.AddComponent (typeof(BufferRenderingManager));
+				bufferRenderingManager = (BufferRenderingManager)nearCamera.gameObject.AddComponent (typeof(BufferRenderingManager));
 				bufferRenderingManager.start();
 
 				//copy stock depth buffers and combine into a single depth buffer
 				if (useOceanShaders || fullLensFlareReplacement)
 				{
-					farDepthCommandbuffer = farCamera.gameObject.AddComponent<DepthToDistanceCommandBuffer>();
+					//farDepthCommandbuffer = farCamera.gameObject.AddComponent<DepthToDistanceCommandBuffer>();
 					nearDepthCommandbuffer = nearCamera.gameObject.AddComponent<DepthToDistanceCommandBuffer>();
 				}
 			}
@@ -457,6 +460,22 @@ namespace scatterer
 
 		void Update ()
 		{
+			if (HighLogic.LoadedScene == GameScenes.FLIGHT && nearCamera && farCamera)
+			{
+
+//				works, no perf improvements? after all didn't disable far camera, if disable it nothing works anymore
+				farCamera.nearClipPlane=700000f;
+				farCamera.farClipPlane=700000f;
+				
+				nearCamera.nearClipPlane =1f;
+				nearCamera.farClipPlane =700000f;
+
+				farCamera.enabled=false; //breaks everything?
+
+
+			}
+
+
 			//toggle whether GUI is visible or not
 			if ((Input.GetKey (guiModifierKey1) || Input.GetKey (guiModifierKey2)) && (Input.GetKeyDown (guiKey1) || (Input.GetKeyDown (guiKey2))))
 			{
@@ -684,12 +703,12 @@ namespace scatterer
 					}
 				}
 
-				//move this out of this update, let it be a one time thing
-				if (bufferRenderingManager)
-				{
-					if (!bufferRenderingManager.depthTextureCleared && (MapView.MapIsEnabled || !pqsEnabledOnScattererPlanet) )
-						bufferRenderingManager.clearDepthTexture();
-				}
+//				//move this out of this update, let it be a one time thing
+//				if (bufferRenderingManager)
+//				{
+//					if (!bufferRenderingManager.depthTextureCleared && (MapView.MapIsEnabled || !pqsEnabledOnScattererPlanet) )
+//						bufferRenderingManager.clearDepthTexture();
+//				}
 				//update sun flare
 				if (fullLensFlareReplacement)
 				{
@@ -743,14 +762,14 @@ namespace scatterer
 				}
 				
 
-				if (farCamera)
+				if (nearCamera)
 				{
 					if (nearCamera.gameObject.GetComponent (typeof(Wireframe)))
 						Component.Destroy (nearCamera.gameObject.GetComponent (typeof(Wireframe)));
 					
 					
-					if (farCamera.gameObject.GetComponent (typeof(Wireframe)))
-						Component.Destroy (farCamera.gameObject.GetComponent (typeof(Wireframe)));
+//					if (farCamera.gameObject.GetComponent (typeof(Wireframe)))
+//						Component.Destroy (farCamera.gameObject.GetComponent (typeof(Wireframe)));
 					
 					
 					if (scaledSpaceCamera.gameObject.GetComponent (typeof(Wireframe)))
@@ -814,7 +833,8 @@ namespace scatterer
 
 				inGameWindowLocation=new Vector2(windowRect.x,windowRect.y);
 				saveSettings();
-			}
+				//re-enable far camera
+				farCamera.enabled=true;			}
 
 			UnityEngine.Object.Destroy (GUItool);
 			
@@ -963,8 +983,11 @@ namespace scatterer
 		{
 			if (terrainShadows && (HighLogic.LoadedScene != GameScenes.MAINMENU ) )
 			{
-				QualitySettings.shadowDistance = shadowsDistance;
+				//QualitySettings.shadowDistance = shadowsDistance;
+				QualitySettings.shadowDistance = 10000f;
 				Debug.Log("[Scatterer] Number of shadow cascades detected "+QualitySettings.shadowCascades.ToString());
+
+				Debug.Log("Ghassen shadow resolution: "+QualitySettings.shadowResolution.ToString());
 
 
 				if (shadowsOnOcean)

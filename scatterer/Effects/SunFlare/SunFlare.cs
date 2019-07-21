@@ -251,8 +251,8 @@ namespace scatterer
 			//if (!MapView.MapIsEnabled)
 			{
 	
-				hitStatus = Physics.Raycast (Core.Instance.farCamera.transform.position,
-				                             (source.transform.position- Core.Instance.farCamera.transform.position).normalized,
+				hitStatus = Physics.Raycast (Core.Instance.nearCamera.transform.position,
+				                             (source.transform.position- Core.Instance.nearCamera.transform.position).normalized,
 				                             out hit, Mathf.Infinity, (int)((1 << 15) + (1 << 0)));
 				if(!hitStatus)
 				{

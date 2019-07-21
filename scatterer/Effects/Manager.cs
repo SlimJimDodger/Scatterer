@@ -66,7 +66,7 @@ namespace scatterer
 				
 				if (hasOcean && Core.Instance.useOceanShaders && (HighLogic.LoadedScene !=GameScenes.MAINMENU))
 				{
-					m_oceanNode = (OceanWhiteCaps) Core.Instance.farCamera.gameObject.AddComponent(typeof(OceanWhiteCaps));
+					m_oceanNode = (OceanWhiteCaps) Core.Instance.nearCamera.gameObject.AddComponent(typeof(OceanWhiteCaps));
 					m_oceanNode.setManager(this);
 					
 					m_oceanNode.loadFromConfigNode();
@@ -110,7 +110,7 @@ namespace scatterer
 				Component.Destroy(m_oceanNode);
 				UnityEngine.Object.Destroy(m_oceanNode);
 
-				m_oceanNode = (OceanWhiteCaps) Core.Instance.farCamera.gameObject.AddComponent(typeof(OceanWhiteCaps));
+				m_oceanNode = (OceanWhiteCaps) Core.Instance.nearCamera.gameObject.AddComponent(typeof(OceanWhiteCaps));
 				m_oceanNode.setManager(this);
 				m_oceanNode.loadFromConfigNode();
 				m_oceanNode.Init();

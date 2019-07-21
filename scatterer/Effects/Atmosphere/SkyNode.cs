@@ -366,7 +366,7 @@ namespace scatterer
 
 			if (!MapView.MapIsEnabled && Core.Instance.sunlightExtinction)
 			{
-				Vector3 extinctionPosition = (FlightGlobals.ActiveVessel ? FlightGlobals.ActiveVessel.transform.position : Core.Instance.farCamera.transform.position)- parentLocalTransform.position;
+				Vector3 extinctionPosition = (FlightGlobals.ActiveVessel ? FlightGlobals.ActiveVessel.transform.position : Core.Instance.nearCamera.transform.position)- parentLocalTransform.position;
 
 				float lerpedScale = Mathf.Lerp(1f,experimentalAtmoScale,(extinctionPosition.magnitude-m_radius)/2000f); //hack but keeps the extinction beautiful at sea level, and matches the clouds when you get higher
 
@@ -499,7 +499,7 @@ namespace scatterer
 					sunflareExtinctionMaterial.SetFloat("_experimentalAtmoScale",experimentalAtmoScale);
 
 					if (!MapView.MapIsEnabled)
-						sunflareExtinctionMaterial.SetVector ("_Globals_WorldCameraPos", Core.Instance.farCamera.transform.position - parentLocalTransform.position);
+						sunflareExtinctionMaterial.SetVector ("_Globals_WorldCameraPos", Core.Instance.nearCamera.transform.position - parentLocalTransform.position);
 					else
 						sunflareExtinctionMaterial.SetVector ("_Globals_WorldCameraPos", (Vector3) ScaledSpace.ScaledToLocalSpace(Core.Instance.scaledSpaceCamera.transform.position) - parentLocalTransform.position);
 
@@ -521,6 +521,12 @@ namespace scatterer
 		
 		public void UpdateNode ()
 		{
+//			m_manager.parentCelestialBody.scaledBody.GetComponent<ScaledSpaceFader>().fadeStart = 40000f;
+//			m_manager.parentCelestialBody.scaledBody.GetComponent<ScaledSpaceFader>().fadeEnd   = 50000f;
+//			var cbTransform = m_manager.parentCelestialBody.pqsController.GetComponentsInChildren<PQSMod_CelestialBodyTransform> (true).Where (mod => mod.transform.parent == m_manager.parentCelestialBody.pqsController.transform).FirstOrDefault (); 
+//			cbTransform.deactivateAltitude = 50000f;
+
+
 			if ((m_manager.parentCelestialBody.pqsController != null) && !(HighLogic.LoadedScene == GameScenes.TRACKSTATION))
 			{
 				bool prevState = inScaledSpace;
@@ -588,7 +594,7 @@ namespace scatterer
 			{
 				if(!(HighLogic.LoadedScene == GameScenes.TRACKSTATION))
 				{
-					alt = Vector3.Distance (Core.Instance.farCamera.transform.position, parentLocalTransform.position);
+					alt = Vector3.Distance (Core.Instance.nearCamera.transform.position, parentLocalTransform.position);
 					
 					trueAlt = alt - m_radius;
 				}
@@ -665,7 +671,7 @@ namespace scatterer
 			
 			mat.SetVector (ShaderProperties._Sun_WorldSunDir_PROPERTY, m_manager.getDirectionToSun ().normalized);
 
-			mat.SetVector("_camForward", Core.Instance.farCamera.transform.forward);
+			mat.SetVector("_camForward", Core.Instance.nearCamera.transform.forward);
 
 			UpdatePostProcessMaterial (mat);
 		}
@@ -724,7 +730,8 @@ namespace scatterer
 			else
 				mat.SetFloat ("_PlanetOpacity", 1f);
 
-			float camerasOverlap = Core.Instance.nearCamera.farClipPlane - Core.Instance.farCamera.nearClipPlane;
+			//float camerasOverlap = Core.Instance.nearCamera.farClipPlane - Core.Instance.farCamera.nearClipPlane;
+			float camerasOverlap = 0f;
 			Debug.Log("[Scatterer] Camera overlap: "+camerasOverlap.ToString());
 			mat.SetFloat("_ScattererCameraOverlap",camerasOverlap);
 		}
