@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{604EF0A2-B04D-4A3C-99AB-B039093AE098}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>scatterer</RootNamespace>
+    <AssemblyName>scatterer</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>False</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="DataSerialization\ConfigPoint.cs" />
+    <Compile Include="DataSerialization\PlanetshineSource.cs" />
+    <Compile Include="DataSerialization\ScattererCelestialBody.cs" />
+    <Compile Include="DataSerialization\PlanetsListReader.cs" />
+    <Compile Include="Core.cs" />
+    <Compile Include="Effects\Ocean\Utils\OceanCameraUpdateHook.cs" />
+    <Compile Include="Utilities\WireFrame.cs" />
+    <Compile Include="Utilities\DisableEffectsForTextureReplacer.cs" />
+    <Compile Include="Utilities\DisableEffectsChecker.cs" />
+    <Compile Include="Utilities\DisableAmbientLight.cs" />
+    <Compile Include="Utilities\BufferRenderingManager.cs" />
+    <Compile Include="Utilities\EncodeFloat.cs" />
+    <Compile Include="Utilities\ShaderProperties.cs" />
+    <Compile Include="Utilities\RenderTypeFixer.cs" />
+    <Compile Include="Utilities\ShaderReplacer.cs" />
+    <Compile Include="Effects\Manager.cs" />
+    <Compile Include="Effects\Atmosphere\SkyNode.cs" />
+    <Compile Include="Effects\Ocean\Node.cs" />
+    <Compile Include="Effects\Ocean\OceanNode.cs" />
+    <Compile Include="Effects\Ocean\OceanWhiteCaps.cs" />
+    <Compile Include="Effects\Ocean\FourierGPU.cs" />
+    <Compile Include="Effects\Ocean\FourierCPU.cs" />
+    <Compile Include="Effects\Ocean\OceanFFTcpu.cs" />
+    <Compile Include="Effects\Ocean\OceanFFTgpu.cs" />
+    <Compile Include="Effects\Ocean\Utils\FakeOceanPQS.cs" />
+    <Compile Include="Effects\Ocean\Utils\WriteFloat.cs" />
+    <Compile Include="Effects\Ocean\Utils\RTUtility.cs" />
+    <Compile Include="Effects\SunFlare\SunFlare.cs" />
+    <Compile Include="Effects\SunFlare\SunflareCameraHook.cs" />
+    <Compile Include="GUI\GUIhandler.cs" />
+    <Compile Include="GUI\ToolbarButton.cs" />
+    <Compile Include="Utilities\TweakFarCameraShadowCascades.cs" />
+    <Compile Include="Utilities\MeshFactory.cs" />
+    <Compile Include="Utilities\Math\MathUtility.cs" />
+    <Compile Include="Utilities\Math\Matrix3x3.cs" />
+    <Compile Include="Utilities\Math\Matrix3x3d.cs" />
+    <Compile Include="Utilities\Math\Matrix4x4d.cs" />
+    <Compile Include="Utilities\Math\Quat.cs" />
+    <Compile Include="Utilities\Math\Vector2d.cs" />
+    <Compile Include="Utilities\Math\Vector2i.cs" />
+    <Compile Include="Utilities\Math\Vector3d2.cs" />
+    <Compile Include="Utilities\Math\Vector4d.cs" />
+    <Compile Include="Utilities\SimpleRenderingShape.cs" />
+    <Compile Include="Effects\Occlusion\ShadowMapCopyCommandBuffer.cs" />
+    <Compile Include="Effects\Occlusion\ShadowMaskCopyCommandBuffer.cs" />
+    <Compile Include="Effects\Occlusion\ShadowRemoveFadeCommandBuffer.cs" />
+    <Compile Include="Effects\Occlusion\ShadowMaskModulateCommandBuffer.cs" />
+    <Compile Include="Effects\SunlightModulator\SunlightModulator.cs" />
+    <Compile Include="Effects\SunlightModulator\SunlightModulatorPostRenderHook.cs" />
+    <Compile Include="Effects\SunlightModulator\SunlightModulatorPreRenderHook.cs" />
+    <Compile Include="Effects\PlanetShine\PlanetShineLight.cs" />
+    <Compile Include="Effects\Ocean\UnderwaterDimmingHook.cs" />
+    <Compile Include="Effects\Occlusion\ShadowMapRetrieveCommandBuffer.cs" />
+    <Compile Include="Effects\Atmosphere\Utils\SkySphereKSCUpdater.cs" />
+    <Compile Include="Effects\Atmosphere\Utils\AtmosphereUtils.cs" />
+    <Compile Include="Utilities\EVEUtils.cs" />
+    <Compile Include="Effects\Atmosphere\Utils\AtmospherePQS.cs" />
+    <Compile Include="Effects\Atmosphere\Utils\AtmosphereProjector.cs" />
+    <Compile Include="Utilities\DepthToDistanceCommandBuffer.cs" />
+    <Compile Include="DataSerialization\MainSettingsReadWrite.cs" />
+    <Compile Include="DataSerialization\PluginDataReadWrite.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\KSPBackup\1_7_3\Kerbal Space Program\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="UnityEngine">
+      <HintPath>D:\KSPBackup\1_7_3\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\KSPBackup\1_7_3\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>call $(ProjectDir)postbuild.bat</PostBuildEvent>
+  </PropertyGroup>
+</Project>
