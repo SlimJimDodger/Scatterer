@@ -15,22 +15,30 @@ namespace scatterer
 
 		public DepthToDistanceCommandBuffer ()
 		{
-			// after depth texture is rendered on far and near cameras, copy it and merge it as a single distance buffer
-			m_Camera = gameObject.GetComponent<Camera>();
-			Debug.Log ("[Scatterer] Adding DepthToDistanceCommandBuffer to "+m_Camera.name);
-			m_Buffer = new CommandBuffer();
-			m_Buffer.name = "ScattererDepthToDistanceCommandBuffer";
-			m_Material = new Material (ShaderReplacer.Instance.LoadedShaders[("Scatterer/DepthToDistance")]);
+		}
 
-			if (m_Camera.name == "Camera 01"){
-				m_Buffer.SetRenderTarget(Core.Instance.bufferRenderingManager.depthTexture);
-				m_Buffer.ClearRenderTarget (false, true, Color.white);
+		void Awake()
+		{
+			if (m_Camera == null)
+			{
+				// after depth texture is rendered on far and near cameras, copy it and merge it as a single distance buffer
+				m_Camera = gameObject.GetComponent<Camera>();
+				Debug.Log("[Scatterer] Adding DepthToDistanceCommandBuffer to " + m_Camera.name);
+				m_Buffer = new CommandBuffer();
+				m_Buffer.name = "ScattererDepthToDistanceCommandBuffer";
+				m_Material = new Material(ShaderReplacer.Instance.LoadedShaders[("Scatterer/DepthToDistance")]);
+
+				if (m_Camera.name == "Camera 01")
+				{
+					m_Buffer.SetRenderTarget(Core.Instance.bufferRenderingManager.depthTexture);
+					m_Buffer.ClearRenderTarget(false, true, Color.white);
+				}
+
+
+				m_Buffer.Blit(null, Core.Instance.bufferRenderingManager.depthTexture, m_Material); //change to shadowmap texture
+
+				m_Camera.AddCommandBuffer(CameraEvent.AfterDepthTexture, m_Buffer);
 			}
-
-
-			m_Buffer.Blit (null, Core.Instance.bufferRenderingManager.depthTexture, m_Material); //change to shadowmap texture
-
-			m_Camera.AddCommandBuffer (CameraEvent.AfterDepthTexture, m_Buffer);
 		}
 
 		public void OnDestroy ()

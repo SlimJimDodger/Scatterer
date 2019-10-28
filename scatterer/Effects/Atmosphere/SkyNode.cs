@@ -55,7 +55,7 @@ namespace scatterer
 
 		float alt;
 		public float trueAlt;
-		PluginConfiguration cfg = KSP.IO.PluginConfiguration.CreateForType < SkyNode > (null);
+		PluginConfiguration cfg; 
 		
 		string celestialBodyName;
 		Transform parentScaledTransform, parentLocalTransform;
@@ -159,6 +159,14 @@ namespace scatterer
 		[Persistent]
 		public string assetPath;
 		
+		void Awake()
+		{
+			if(cfg == null)
+			{
+				cfg = KSP.IO.PluginConfiguration.CreateForType<SkyNode>(null);
+			}
+		}
+
 		public void Init ()
 		{
 			m_radius = (float) m_manager.GetRadius ();

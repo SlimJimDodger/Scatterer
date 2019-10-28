@@ -41,7 +41,7 @@ namespace scatterer
 		}
 
 		public Rect windowRect = new Rect (0, 0, 400, 50);
-		int windowId = UnityEngine.Random.Range(int.MinValue,int.MaxValue);
+		int windowId = new System.Random().Next(int.MinValue,int.MaxValue);
 
 		GUIhandler GUItool= new GUIhandler();
 
@@ -195,6 +195,101 @@ namespace scatterer
 
 		void Awake ()
 		{
+			//find main cameras
+			Camera[] cams = Camera.allCameras;
+
+			scaledSpaceCamera = Camera.allCameras.FirstOrDefault(_cam => _cam.name == "Camera ScaledSpace");
+			farCamera = Camera.allCameras.FirstOrDefault(_cam => _cam.name == "Camera 01");
+			nearCamera = Camera.allCameras.FirstOrDefault(_cam => _cam.name == "Camera 00");
+
+			if (scaledSpaceCamera && farCamera && nearCamera)
+			{
+				farCameraShadowCascadeTweaker = (TweakFarCameraShadowCascades)farCamera.gameObject.AddComponent(typeof(TweakFarCameraShadowCascades));
+
+				if (overrideNearClipPlane)
+				{
+					Debug.Log("[Scatterer] Override near clip plane from:" + nearCamera.nearClipPlane.ToString() + " to:" + nearClipPlane.ToString());
+					nearCamera.nearClipPlane = nearClipPlane;
+				}
+			}
+			else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
+			{
+				//if are in main menu, where there is only 1 camera, affect all cameras to Landscape camera
+				scaledSpaceCamera = Camera.allCameras.Single(_cam => _cam.name == "Landscape Camera");
+				farCamera = scaledSpaceCamera;
+				nearCamera = scaledSpaceCamera;
+			}
+			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
+			{
+				scaledSpaceCamera = cams[0];
+				//if in trackstation, just to get rid of some nullrefs
+				farCamera = scaledSpaceCamera;
+				nearCamera = scaledSpaceCamera;
+			}
+			else if (HighLogic.LoadedScene == GameScenes.LOADING)
+			{
+				scaledSpaceCamera = cams[0];
+				farCamera = scaledSpaceCamera;
+				nearCamera = scaledSpaceCamera;
+			}
+			else if(HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.FLIGHT)
+			{
+				scaledSpaceCamera = Camera.allCameras.FirstOrDefault(_cam => _cam.name.Equals("GalaxyCamera"));
+				farCamera = scaledSpaceCamera;
+				nearCamera = scaledSpaceCamera;
+			}
+
+			//create buffer manager
+			if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
+			{
+				bufferRenderingManager = (BufferRenderingManager)farCamera.gameObject.AddComponent(typeof(BufferRenderingManager));
+				bufferRenderingManager.start();
+
+				//copy stock depth buffers and combine into a single depth buffer
+				if (useOceanShaders || fullLensFlareReplacement)
+				{
+					farDepthCommandbuffer = farCamera.gameObject.AddComponent<DepthToDistanceCommandBuffer>();
+					nearDepthCommandbuffer = nearCamera.gameObject.AddComponent<DepthToDistanceCommandBuffer>();
+				}
+			}
+
+			// bufferRenderingManager = (BufferRenderingManager)farCamera.gameObject.AddComponent(typeof(BufferRenderingManager));
+
+			//find sunlight and set shadow bias
+			lights = (Light[])Light.FindObjectsOfType(typeof(Light));
+
+			foreach (Light _light in lights)
+			{
+				if (_light.gameObject.name == "Scaledspace SunLight")
+				{
+					scaledspaceSunLight = _light.gameObject;
+
+					_light.shadowNormalBias = shadowNormalBias;
+					_light.shadowBias = shadowBias;
+				}
+
+				if (_light.gameObject.name == "SunLight")
+				{
+					sunLight = _light.gameObject;
+				}
+
+
+				if (_light.gameObject.name.Contains("PlanetLight") || _light.gameObject.name.Contains("Directional light"))
+				{
+					mainMenuLight = _light.gameObject;
+					Debug.Log("[Scatterer] Found main menu light");
+				}
+			}
+
+			//add shadow far plane fixer
+			shadowFadeRemover = (ShadowRemoveFadeCommandBuffer)nearCamera.gameObject.AddComponent(typeof(ShadowRemoveFadeCommandBuffer));
+
+			//create sunlightModulator
+			if (sunlightExtinction || (underwaterLightDimming && useOceanShaders))
+			{
+				sunlightModulatorInstance = (SunlightModulator)Core.Instance.scaledSpaceCamera.gameObject.AddComponent(typeof(SunlightModulator));
+			}
+
 			string codeBase = Assembly.GetExecutingAssembly ().CodeBase;
 			UriBuilder uri = new UriBuilder (codeBase);
 			path = Uri.UnescapeDataString (uri.Path);
@@ -261,63 +356,6 @@ namespace scatterer
 			
 			//find sun
 			sunCelestialBody = CelestialBodies.SingleOrDefault (_cb => _cb.GetName () == mainSunCelestialBodyName);
-			
-			//find main cameras
-			Camera[] cams = Camera.allCameras;
-
-			scaledSpaceCamera = Camera.allCameras.FirstOrDefault(_cam  => _cam.name == "Camera ScaledSpace");
-			farCamera = Camera.allCameras.FirstOrDefault(_cam  => _cam.name == "Camera 01");
-			nearCamera = Camera.allCameras.FirstOrDefault(_cam  => _cam.name == "Camera 00");
-
-			if (scaledSpaceCamera && farCamera && nearCamera)
-			{
-				farCameraShadowCascadeTweaker = (TweakFarCameraShadowCascades) farCamera.gameObject.AddComponent(typeof(TweakFarCameraShadowCascades));
-
-				if (overrideNearClipPlane)
-				{
-					Debug.Log("[Scatterer] Override near clip plane from:"+nearCamera.nearClipPlane.ToString()+" to:"+nearClipPlane.ToString());
-					nearCamera.nearClipPlane = nearClipPlane;
-				}
-			}
-			else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
-			{
-				//if are in main menu, where there is only 1 camera, affect all cameras to Landscape camera
-				scaledSpaceCamera = Camera.allCameras.Single(_cam  => _cam.name == "Landscape Camera");
-				farCamera = scaledSpaceCamera;
-				nearCamera = scaledSpaceCamera;
-			}
-			else if (HighLogic.LoadedScene == GameScenes.TRACKSTATION)
-			{
-				//if in trackstation, just to get rid of some nullrefs
-				farCamera = scaledSpaceCamera;
-				nearCamera = scaledSpaceCamera;
-			}
-
-			//find sunlight and set shadow bias
-			lights = (Light[]) Light.FindObjectsOfType(typeof( Light));
-			
-			foreach (Light _light in lights)
-			{
-				if (_light.gameObject.name == "Scaledspace SunLight")
-				{
-					scaledspaceSunLight=_light.gameObject;
-					
-					_light.shadowNormalBias =shadowNormalBias;
-					_light.shadowBias=shadowBias;
-				}
-				
-				if (_light.gameObject.name == "SunLight")
-				{
-					sunLight=_light.gameObject;
-				}	
-
-				
-				if (_light.gameObject.name.Contains ("PlanetLight") || _light.gameObject.name.Contains ("Directional light"))
-				{
-					mainMenuLight = _light.gameObject;
-					Debug.Log("[Scatterer] Found main menu light");
-				}
-			}
 			
 			//load planetshine "cookie" cubemap
 			if(usePlanetShine)
@@ -413,25 +451,10 @@ namespace scatterer
 				}
 			}
 			
-			//create buffer manager
-			if (HighLogic.LoadedScene != GameScenes.TRACKSTATION)
-			{
-				bufferRenderingManager = (BufferRenderingManager)farCamera.gameObject.AddComponent (typeof(BufferRenderingManager));
-				bufferRenderingManager.start();
-
-				//copy stock depth buffers and combine into a single depth buffer
-				if (useOceanShaders || fullLensFlareReplacement)
-				{
-					farDepthCommandbuffer = farCamera.gameObject.AddComponent<DepthToDistanceCommandBuffer>();
-					nearDepthCommandbuffer = nearCamera.gameObject.AddComponent<DepthToDistanceCommandBuffer>();
-				}
-			}
 
 //			//add shadowmask modulator (adds occlusion to shadows)
 //			shadowMaskModulate = (ShadowMaskModulateCommandBuffer)sunLight.AddComponent (typeof(ShadowMaskModulateCommandBuffer));
 //
-			//add shadow far plane fixer
-			shadowFadeRemover = (ShadowRemoveFadeCommandBuffer)nearCamera.gameObject.AddComponent (typeof(ShadowRemoveFadeCommandBuffer));
 
 			//find EVE clouds
 			if (integrateWithEVEClouds)
@@ -443,12 +466,6 @@ namespace scatterer
 			if (HighLogic.LoadedScene == GameScenes.SPACECENTER)
 			{
 				MapView.MapIsEnabled = false;
-			}
-
-			//create sunlightModulator
-			if (sunlightExtinction || (underwaterLightDimming && useOceanShaders))
-			{
-				sunlightModulatorInstance = (SunlightModulator) Core.Instance.scaledSpaceCamera.gameObject.AddComponent(typeof(SunlightModulator));
 			}
 
 			coreInitiated = true;

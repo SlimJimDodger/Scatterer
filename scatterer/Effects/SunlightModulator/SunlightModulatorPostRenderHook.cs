@@ -20,7 +20,10 @@ namespace scatterer
 
 		public void OnPostRender()
 		{
-			Core.Instance.sunlightModulatorInstance.restoreOriginalColor ();
+			if (Core.Instance.sunlightModulatorInstance != null)
+			{
+				Core.Instance.sunlightModulatorInstance.restoreOriginalColor();
+			}
 		}
 	}
 }

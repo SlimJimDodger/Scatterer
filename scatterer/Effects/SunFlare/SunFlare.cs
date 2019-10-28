@@ -283,7 +283,7 @@ namespace scatterer
 			sunglareMaterial.SetFloat ("sunGlareFade", sunGlareFade);
 			sunglareMaterial.SetFloat ("ghostFade", ghostFade);
 
-			if (!(HighLogic.LoadedScene == GameScenes.TRACKSTATION))
+			if (!(HighLogic.LoadedScene == GameScenes.TRACKSTATION) && Core.Instance.bufferRenderingManager != null)
 				sunglareMaterial.SetTexture ("_customDepthTexture", Core.Instance.bufferRenderingManager.depthTexture);
 		}	
 

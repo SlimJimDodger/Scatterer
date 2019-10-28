@@ -99,7 +99,7 @@ namespace scatterer
 			Projector[] list = (Projector[]) Projector.FindObjectsOfType(typeof(Projector));
 			for(int i=0;i<list.Length;i++)
 			{
-				if (list[i].material.name == "EVE/CloudShadow")
+				if (list[i].material != null && list[i].name == "EVE/CloudShadow")
 				{
 					EVEprojector.Add(list[i]);
 					//list[i].material = atmosphereMaterial;

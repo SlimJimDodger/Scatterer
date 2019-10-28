@@ -22,11 +22,17 @@ namespace scatterer
 		SunlightModulatorPostRenderHook postRenderHook;
 		
 		private SunlightModulator()
+		{																																						  //but also the issue is that internalCamera
+		}
+
+		void Awake()
 		{
-			sunLight = Core.Instance.sunLight.GetComponent < Light > ();
-			preRenderHook = (SunlightModulatorPreRenderHook) Core.Instance.farCamera.gameObject.AddComponent(typeof(SunlightModulatorPreRenderHook));
-			postRenderHook = (SunlightModulatorPostRenderHook) Core.Instance.nearCamera.gameObject.AddComponent(typeof(SunlightModulatorPostRenderHook)); //less than optimal, doesn't affect internalCamera
-																																						  //but also the issue is that internalCamera
+			if (sunLight == null && Core.Instance.sunLight != null)
+			{
+				sunLight = Core.Instance.sunLight.GetComponent<Light>();
+				preRenderHook = (SunlightModulatorPreRenderHook)Core.Instance.farCamera.gameObject.AddComponent(typeof(SunlightModulatorPreRenderHook));
+				postRenderHook = (SunlightModulatorPostRenderHook)Core.Instance.nearCamera.gameObject.AddComponent(typeof(SunlightModulatorPostRenderHook)); //less than optimal, doesn't affect internalCamera
+			}
 		}
 
 		public void OnPreCull() //added to scaledSpaceCamera, called before any calls from skyNode or oceanNode
@@ -36,8 +42,11 @@ namespace scatterer
 
 		public void storeOriginalColor()    //may not be necessary every frame?
 		{
-			originalColor = sunLight.color;
-			//Debug.Log ("store original color " + originalColor.ToString ());
+			if (sunLight != null)
+			{
+				originalColor = sunLight.color;
+				//Debug.Log ("store original color " + originalColor.ToString ());
+			}
 		}
 
 		public void modulateByAttenuation(float inAttenuation) //called by skynode, ie scaledSpaceCamera onPreCull

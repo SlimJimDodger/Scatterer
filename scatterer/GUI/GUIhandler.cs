@@ -17,7 +17,7 @@ namespace scatterer
 	{
 
 		public Rect windowRect = new Rect (0, 0, 400, 50);
-		int windowId = UnityEngine.Random.Range(int.MinValue,int.MaxValue);
+		int windowId = new System.Random().Next(int.MinValue,int.MaxValue);
 
 		public int selectedPlanet = 0;
 		public int selectedConfigPoint = 0;

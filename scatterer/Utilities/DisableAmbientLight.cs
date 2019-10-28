@@ -28,28 +28,32 @@ namespace scatterer
 
 		public DisableAmbientLight()
 		{
-			//find sunlight
-			lights = (Light[]) Light.FindObjectsOfType(typeof( Light));
-			foreach (Light _light in lights)
-			{	
-				if (_light.gameObject.name == "Scaledspace SunLight")
+		}
+
+		void Awake()
+		{
+			if (lights == null)
+			{
+				//find sunlight
+				lights = (Light[])Light.FindObjectsOfType(typeof(Light));
+				foreach (Light _light in lights)
 				{
-					scaledspaceSunLight=_light.gameObject;
-					Debug.Log("[Scatterer] disableAmbientLight: Found scaled sunlight");
+					if (_light.gameObject.name == "Scaledspace SunLight")
+					{
+						scaledspaceSunLight = _light.gameObject;
+						Debug.Log("[Scatterer] disableAmbientLight: Found scaled sunlight");
+					}
+
+					if (_light.gameObject.name == "SunLight")
+					{
+						sunLight = _light.gameObject;
+						Debug.Log("[Scatterer] disableAmbientLight: Found sunlight");
+					}
 				}
-				
-				if (_light.gameObject.name == "SunLight")
-				{
-					sunLight=_light.gameObject;
-					Debug.Log("[Scatterer] disableAmbientLight: Found sunlight");
-				}				
+
+				ambientLight = Color.black;
+				_scaledspaceSunLight = scaledspaceSunLight.GetComponent<Light>();
 			}
-
-
-
-			ambientLight = Color.black;
-			_scaledspaceSunLight = scaledspaceSunLight.GetComponent<Light> ();
-
 		}
 
 		public void OnPreRender()
