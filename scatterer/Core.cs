@@ -16,19 +16,21 @@ namespace scatterer
 	public partial class Core: MonoBehaviour
 	{	
 		private static Core instance;
-		
+		private static Core instanceToDestroy;
+
 		private Core()
 		{
 			if (instance == null)
 			{
 				instance = this;
+				instanceToDestroy = null;
 				Debug.Log("[Scatterer] Core instance created");
 			}
 			else
 			{
 				//destroy any duplicate instances that may be created by a duplicate install
 				Debug.Log("[Scatterer] Destroying duplicate instance, check your install for duplicate mod folders");
-				UnityEngine.Object.Destroy (this);
+				instanceToDestroy = this;
 			}
 		}
 		
@@ -195,6 +197,12 @@ namespace scatterer
 
 		void Awake ()
 		{
+			if (instanceToDestroy)
+			{
+				UnityEngine.Object.Destroy(instanceToDestroy);
+				instanceToDestroy = null;
+			}
+
 			//find main cameras
 			Camera[] cams = Camera.allCameras;
 
@@ -215,7 +223,11 @@ namespace scatterer
 			else if (HighLogic.LoadedScene == GameScenes.MAINMENU)
 			{
 				//if are in main menu, where there is only 1 camera, affect all cameras to Landscape camera
-				scaledSpaceCamera = Camera.allCameras.Single(_cam => _cam.name == "Landscape Camera");
+				scaledSpaceCamera = Camera.allCameras.FirstOrDefault(_cam => _cam.name == "Landscape Camera");
+				if(scaledSpaceCamera == null)
+				{
+					scaledSpaceCamera = Camera.allCameras.FirstOrDefault(_cam => _cam.name == "GalaxyCamera");
+				}
 				farCamera = scaledSpaceCamera;
 				nearCamera = scaledSpaceCamera;
 			}
@@ -232,7 +244,7 @@ namespace scatterer
 				farCamera = scaledSpaceCamera;
 				nearCamera = scaledSpaceCamera;
 			}
-			else if(HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.FLIGHT)
+			else if(HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.FLIGHT || HighLogic.LoadedScene == GameScenes.EDITOR)
 			{
 				scaledSpaceCamera = Camera.allCameras.FirstOrDefault(_cam => _cam.name.Equals("GalaxyCamera"));
 				farCamera = scaledSpaceCamera;
@@ -278,6 +290,14 @@ namespace scatterer
 				{
 					mainMenuLight = _light.gameObject;
 					Debug.Log("[Scatterer] Found main menu light");
+				}
+
+				if (HighLogic.LoadedScene == GameScenes.MAINMENU && mainMenuLight == null)
+				{
+					if (scaledspaceSunLight != null)
+						mainMenuLight = scaledspaceSunLight;
+					else
+						mainMenuLight = sunLight;
 				}
 			}
 

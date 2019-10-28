@@ -144,7 +144,7 @@ namespace scatterer
 		
 		public Vector3 getDirectionToSun()
 		{
-			if (HighLogic.LoadedScene == GameScenes.MAINMENU)
+			if (HighLogic.LoadedScene == GameScenes.MAINMENU && Core.Instance.mainMenuLight != null)
 			{
 				return (Core.Instance.mainMenuLight.transform.forward*(-1));
 			}

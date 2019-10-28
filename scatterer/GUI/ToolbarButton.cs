@@ -19,16 +19,27 @@ namespace scatterer
 		public ApplicationLauncherButton button;
 
 		private static ToolbarButton instance;
+		private static ToolbarButton instanceToDestroy;
 
 		private ToolbarButton()
 		{
 			if (instance == null)
 			{
 				instance = this;
+				instanceToDestroy = null;
 			}
 			else
 			{
-				UnityEngine.Object.Destroy (this);
+				instanceToDestroy = this;
+			}
+		}
+
+		void Awake()
+		{
+			if(instanceToDestroy)
+			{
+				UnityEngine.Object.Destroy(instanceToDestroy);
+				instanceToDestroy = null;
 			}
 		}
 
